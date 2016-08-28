@@ -41,5 +41,12 @@ elif app.debug:
 # logging.basicConfig(filename=os.path.join(basedir, 'tmp/fitnesShedule.log'), level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
 # logging.debug('DEBUG ENABLED')
 
+from migrate.versioning import api
+from config import SQLALCHEMY_DATABASE_URI
+from config import SQLALCHEMY_MIGRATE_REPO
+from app import db_helper
+
+
+db_helper.create_db()
 
 from app import views
