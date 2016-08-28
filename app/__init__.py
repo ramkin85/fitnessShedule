@@ -48,5 +48,6 @@ from app import db_helper
 
 
 db_helper.create_db()
+db_helper.upgrade_db()
 
 from app import views

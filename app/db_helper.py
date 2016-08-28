@@ -8,6 +8,7 @@ import os.path
 
 def create_db():
     v = api.db_version(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO)
+    app.logger.debug('v = %s' % v)
     app.logger.debug('v is None = %s' % v is None)
     if v is None:
         db.create_all()
@@ -17,3 +18,9 @@ def create_db():
         else:
             api.version_control(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO, api.version(SQLALCHEMY_MIGRATE_REPO))
     app.logger.debug('DB CREATED')
+
+
+def upgrade_db():
+    v = api.db_version(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO)
+    api.upgrade(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO, v)
+    print('Current database version: ' + str(api.db_version(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO)))
