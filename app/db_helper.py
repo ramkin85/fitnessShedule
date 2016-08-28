@@ -1,11 +1,10 @@
 from migrate.versioning import api
 from config import SQLALCHEMY_DATABASE_URI
 from config import SQLALCHEMY_MIGRATE_REPO
-from app import db
 import os.path
 
 
-def create_db(app):
+def create_db(app, db):
     v = api.db_version(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO)
     app.logger.info('v = %s' % v)
     app.logger.info('v is None = %s' % v is None)
