@@ -1,12 +1,11 @@
 from migrate.versioning import api
-from app import app
 from config import SQLALCHEMY_DATABASE_URI
 from config import SQLALCHEMY_MIGRATE_REPO
 from app import db
 import os.path
 
 
-def create_db():
+def create_db(app):
     v = api.db_version(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO)
     app.logger.info('v = %s' % v)
     app.logger.info('v is None = %s' % v is None)
@@ -22,7 +21,7 @@ def create_db():
         app.logger.info('DB ALREADY CREATED')
 
 
-def upgrade_db():
+def upgrade_db(app):
     v = api.db_version(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO)
     app.logger.info('v = %s' % v)
     api.upgrade(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO, v)

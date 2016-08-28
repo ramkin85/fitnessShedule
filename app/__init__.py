@@ -11,8 +11,8 @@ from app import db_helper
 
 app = Flask(__name__)
 
-db_helper.create_db()
-db_helper.upgrade_db()
+db_helper.create_db(app)
+db_helper.upgrade_db(app)
 
 app.config.from_object('config')
 db = SQLAlchemy(app)
