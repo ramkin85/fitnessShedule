@@ -1,0 +1,47 @@
+<div ng-controller="ClientCtrl">
+    <div ng-if="mode=='list'">
+        <div class="container-fluid row">
+            <div class="col-xs-6 col-xs-offset-3">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        Список клиентов
+                        <input type="button" class="btn btn-info btn-xs col-xs-4 pull-right"
+                               value="Добавить"
+                               ng-click="add()">
+                    </div>
+                    <div class="panel-body">
+                        <div class="row {{$index%2==0?'list-group-item-info':''}}" ng-repeat="item in items">
+                            <div class="col-xs-6">
+                                <span class="text-primary">{{item.Name}}</span>
+                            </div>
+                            <div class="col-xs-6">
+                                <input type="button" class="btn btn-danger btn-xs pull-right" value="Удалить"
+                                       ng-click="delete(item.id)">
+                                <input type="button" class="btn btn-info btn-xs pull-right" value="Редактировать"
+                                       ng-click="edit(item)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div ng-if="mode==='add' || mode==='edit'">
+        <div class="container-fluid row">
+            <div class="col-xs-6 col-xs-offset-3">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">Информация о клиенте</div>
+                    <div class="panel-body">
+                        <input type="text" class="form-control form-group" placeholder="ФИО" ng-model="client.Name"/>
+                        <input type="text" class="form-control form-group" placeholder="Телефон" ng-model="client.Phone"/>
+
+                        <div class="btn-group pull-right" role="group">
+                            <input type="button" class="btn btn-default" ng-click="cancel()" value="Отменить">
+                            <input type="button" class="btn btn-success" ng-click="confirm()" value="Сохранить">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

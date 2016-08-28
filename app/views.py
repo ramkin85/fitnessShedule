@@ -12,10 +12,10 @@ from app import lesson
 @app.route('/index', methods=['GET', 'POST'])
 def index():
     #return 'hello world'
-	return render_template('frontEnd/app/index.html', title='Расписание')
+	return render_template('index.html', title='Расписание')
 
 
-@app.route('/api/trainer', methods=['POST'])
+@app.route('/api/trainer', methods=['POST','GET'])
 def trainer(request):
     return trainer_api(request)
 
