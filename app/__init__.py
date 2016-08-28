@@ -7,8 +7,13 @@ from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from config import basedir, ADMINS, MAIL_SERVER, MAIL_PASSWORD, MAIL_USERNAME, MAIL_PORT
 import logging
+from app import db_helper
 
 app = Flask(__name__)
+
+db_helper.create_db()
+db_helper.upgrade_db()
+
 app.config.from_object('config')
 db = SQLAlchemy(app)
 # lm = LoginManager()
@@ -44,10 +49,5 @@ elif app.debug:
 from migrate.versioning import api
 from config import SQLALCHEMY_DATABASE_URI
 from config import SQLALCHEMY_MIGRATE_REPO
-from app import db_helper
-
-
-db_helper.create_db()
-db_helper.upgrade_db()
 
 from app import views
