@@ -1,0 +1,50 @@
+<div ng-controller="TrainerCtrl">
+    <div ng-if="mode==='list'">
+        <div class="container-fluid row">
+            <div class="col-xs-6 col-xs-offset-3">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        Список тренеров
+                        <input type="button" class="btn btn-info btn-xs col-xs-4 pull-right"
+                               value="Добавить"
+                               ng-click="add()">
+                    </div>
+                    <div class="panel-body">
+                        <div class="row {{$index%2==0?'list-group-item-info':''}}" ng-repeat="item in items">
+                            <div class="col-xs-6">
+                                <span class="text-primary">{{item.Name}}</span>
+                            </div>
+                            <div class="col-xs-6 pull-right">
+                                <input type="button" class="btn btn-xs pull-right disabled" value="Расписание"
+                                       ng-click="shedule(item)">
+                                <input type="button" class="btn btn-danger btn-xs pull-right" value="Удалить"
+                                       ng-click="delete(item.id)">
+                                <input type="button" class="btn btn-info btn-xs pull-right" value="Редактировать"
+                                       ng-click="edit(item)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div ng-if="mode==='add' || mode==='edit'">
+        <div class="container-fluid row">
+            <div class="col-xs-6 col-xs-offset-3">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">Информация о тренере</div>
+                    <div class="panel-body">
+                        <input type="text" id="name" class="form-control form-group" placeholder="ФИО" ng-model="trainer.Name"/>
+                        <input type="text" id="info" class="form-control form-group" placeholder="Информация о тренере" ng-model="trainer.Info"/>
+                        <span class="control-label">Фотография</span>
+                        <input type="file" class="form-control form-group" ng-model="trainer.Foto">
+                        <div class="btn-group pull-right" role="group">
+                            <input type="button" class="btn btn-default" ng-click="cancel()" value="Отменить">
+                            <input type="button" class="btn btn-success" ng-click="confirm()" value="Сохранить">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

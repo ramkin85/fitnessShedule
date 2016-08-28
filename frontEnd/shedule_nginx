@@ -1,0 +1,12 @@
+server {
+	# порт, который будет слушать веб-сервер в ожидании запросов от пользователй
+	listen      8000;
+	# доменное имя
+	server_name     localhost; # замените на собственный домен или IP адрес
+	charset     utf-8;	
+	
+	location /shedule {
+		alias /media/DATA/web/ANGULAR_FRONTEND/shedule/app;
+		index index.html index.htm;
+	}
+}

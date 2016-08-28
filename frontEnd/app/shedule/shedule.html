@@ -1,0 +1,216 @@
+<div ng-controller="SheduleCtrl">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <span>Расписание занятий на неделю </span>
+            <span class="glyphicon glyphicon-chevron-left ts-pointer" ng-click="changeWeek(-1)"></span>
+            <span>{{selectedWeek}}</span>
+            <span class="glyphicon glyphicon-chevron-right ts-pointer" ng-click="changeWeek(1)"></span>
+            <input type="button" class="btn btn-info btn-xs col-xs-2 pull-right"
+                   value="Добавить"
+                   ng-click="add()"
+                   data-toggle="modal"
+                   data-target="#editPanel">
+        </div>
+        <div class="panel-body">
+            <div class="row" ng-repeat="day in DAY_LIST">
+                <div class="col-xs-1 ts-day">{{day.name}}</div>
+                <div class="col-xs-1 btn-info lesson-info" ng-class="(weekShedule[day.id+'_'+time])?'':'lesson-free'"
+                     ng-repeat="time in TIME_LIST">
+                    <div ng-if="weekShedule[day.id+'_'+time]" ng-click="bindClientToClass(weekShedule[day.id+'_'+time])" >
+                        <div data-toggle="modal"
+                             data-target="#bindPanel">
+                        <span>{{weekShedule[day.id+'_'+time].StartTime.substring(0,5)}}</span>
+                        <span>{{weekShedule[day.id+'_'+time].EndTime.substring(0,5)}}</span>
+                        <span>{{weekShedule[day.id+'_'+time].Trainer__Name}}</span>
+                        <span ng-if="weekShedule[day.id+'_'+time].Type=='group'">
+                            {{weekShedule[day.id+'_'+time].FreePlaces || weekShedule[day.id+'_'+time].PlacesCount + '/' + weekShedule[day.id+'_'+time].PlacesCount}}
+                        </span>
+                        <span>{{weekShedule[day.id+'_'+time].Type === 'group'?'Групповое':'Индивидуальное'}}</span>
+                        </div>
+                        <div class="ts-lesson-menu">
+                            <span class="glyphicon glyphicon-list"
+                                  ng-click="getLessonClientList(weekShedule[day.id+'_'+time])"
+                                  data-toggle="modal"
+                                  data-target="#clientListPanel"
+                            ></span>
+                        </div>
+                    </div>
+                    <div ng-if="!weekShedule[day.id+'_'+time]"
+                         data-toggle="modal"
+                         data-target="#votePanel"
+                         ng-click="vote(day.id, time)"
+                    >
+                        <span>{{time.substring(0,5)}}</span>
+                        <span>Голосую за время!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" role="dialog" id="editPanel" aria-labelledby="modalHeader" aria-hidden="true">
+        <div class="modal-dialog" role="form">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="modalHeader">{{currentLessonString}}</h4>
+                </div>
+                <div class="modal-body" ng-if="mode==='add' || mode==='edit'">
+                    <form role="form" class="">
+                        <div class="row">
+                            <div class="form-group col-xs-6 text-center">
+                                <label class="control-label" for="startTime">Время начала</label>
+                                <uib-timepicker id="startTime" ng-model="currentLesson.StartTime"
+                                                minute-step="30"
+                                                show-meridian="false"
+                                                class="ts-margin-auto"
+                                ></uib-timepicker>
+                            </div>
+                            <div class="form-group col-xs-6 text-center">
+                                <label class="control-label" for="endTime">Время окончания</label>
+                                <uib-timepicker id="endTime" ng-model="currentLesson.EndTime"
+                                                minute-step="30"
+                                                show-meridian="false"
+                                                min="currentLesson.StartTime"
+                                                class="ts-margin-auto"
+                                ></uib-timepicker>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="form-group">
+                                    <select name="trainer" class="form-control selectpicker" title="Тренер"
+                                            ng-model="currentLesson.Trainer">
+                                        <option id="{{trainer.id}}" value="{{trainer.id}}" ng-repeat="trainer in trainerList">
+                                            {{trainer.Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <div class="form-group form-control">
+                                    <input id="groupType" type="radio" class="" name="type"
+                                           checked="checked"
+                                           value="group" ng-model="currentLesson.Type"/>
+                                    <span class="title">Групповое</span>
+                                    <input id="individualType" type="radio" class="" name="type"
+                                           value="individual"
+                                           ng-model="currentLesson.Type"/>
+                                    <span class="title">Индивидуальное</span>
+                                </div>
+                            </div>
+                            <div class="col-xs-6" ng-if="currentLesson.Type == 'group'">
+                                <div class="form-group">
+                                    <select name="count" class="form-control selectpicker"
+                                            title="Количество в группе"
+                                            ng-model="currentLesson.PlacesCount">
+                                        <option ng-repeat="i in [1,2,3,4,5,6]">{{i}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <input date-range-picker
+                                       class="form-control date-picker"
+                                       type="text"
+                                       placeholder="Даты действия"
+                                       options="dateRangeOptions"
+                                       ng-model="currentLesson.dateRange"/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="btn-group pull-right" role="group">
+                        <input type="button" class="btn btn-default" ng-click="cancel()" data-dismiss="modal"
+                               value="Отменить">
+                        <input type="button" class="btn btn-success" ng-click="confirm()" value="Сохранить">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" role="dialog" id="bindPanel" aria-labelledby="bindHeader" aria-hidden="true">
+        <div class="modal-dialog" role="form">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="bindHeader">{{currentLessonString}}</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form">
+                        <div class="form-group">
+                            <select name="trainer" class="form-control selectpicker" title="Клиент"
+                                    ng-model="currentLesson.Client">
+                                <option id="{{client.id}}" value="{{client.id}}" ng-repeat="client in clientList">
+                                    {{client.Name}}
+                                </option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="btn-group pull-right" role="group">
+                        <input type="button" class="btn btn-default" ng-click="cancel()" data-dismiss="modal"
+                               value="Отменить">
+                        <input type="button" class="btn btn-success" ng-click="confirm()" data-dismiss="modal" value="Записать">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" role="dialog" id="votePanel" aria-labelledby="voteHeader" aria-hidden="true">
+        <div class="modal-dialog" role="form">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="voteHeader">{{currentLessonString}}</h4>
+                    <p>Вы можете заявить о своем желании ходить на занятия в данное время.
+                        Как только количество желающих будет достаточным, мы организуем занятие.
+                        Если вы хотите заниматься индивидуально или у вас есть дополнительные пожелания к организации занятия, пожалуйста, напишите об этом в комментарии.
+                    </p>
+                </div>
+                <div class="modal-body">
+                    <form role="form">
+                        <div class="form-group">
+                            <input type="text" class="form-control form-group" placeholder="Ваше имя" ng-model="currentClient.Name"/>
+                            <input type="tel" class="form-control form-group" placeholder="Телефон" ng-model="currentClient.Phone"/>
+                            <input type="text" aria-multiline="true" class="form-control form-group" placeholder="Комментарий" ng-model="currentClient.Comment"/>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="btn-group pull-right" role="group">
+                        <input type="button" class="btn btn-default" ng-click="cancel()" data-dismiss="modal"
+                               value="Отменить">
+                        <input type="button" class="btn btn-success" ng-click="confirm('voteForLesson')" data-dismiss="modal" value="Голосовать">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" role="dialog" id="clientListPanel" aria-labelledby="clientListHeader" aria-hidden="true">
+        <div class="modal-dialog" role="form">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true" ng-click="cancel()">&times;</button>
+                    <h4 class="modal-title" id="clientListHeader">{{currentLessonString}}</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form">
+                        <div class="ts-list" ng-repeat="client in currentLesson.clientList">
+                            <span class="ts-list-text ts-link" uib-tooltip="{{'Телефон: '+client.Phone||'не указан'}}">{{client.Name}}</span>
+                            <span class="glyphicon glyphicon-remove-sign ts-delete-icon" ng-click="unbindClient(client.id)" uib-tooltip="Удаление из группы занимающихся"></span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
