@@ -8,7 +8,7 @@ import logging
 #from django.core.serializers.json import DjangoJSONEncoder
 import json
 
-#from shedule.models import Trainer
+from app.models import Trainer
 
 logger = logging.getLogger('django')
 
