@@ -1,8 +1,9 @@
 __author__ = 'ramkin85'
+from app import trainer
 from app import app
 from flask import render_template, request, json
 from app.client import api as client_api
-from app.trainer import api as trainer_api
+#from app.trainer import api as trainer_api
 from app.lesson import api as lesson_api
 
 from app import lesson
@@ -17,7 +18,8 @@ def index():
 
 @app.route('/api/trainer', methods=['POST','GET'])
 def trainer(request):
-    return trainer_api(request)
+    #return trainer_api(request)
+    return trainer.api(request)
 
 
 @app.route('/api/client', methods=['POST'])
