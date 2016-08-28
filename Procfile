@@ -1,1 +1,1 @@
-web gunicorn fitnessShedule:app
+web gunicorn fitshedule:app
