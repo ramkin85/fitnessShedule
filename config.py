@@ -7,7 +7,7 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SQLALCHEMY_DATABASE_URI = 'postgres://hspbmzlocwhqrh:ZX5F7hgn6lAVvqitWcmphDRQgh@ec2-23-21-50-120.compute-1.amazonaws.com:5432/d45j5bghfellop'
+SQLALCHEMY_DATABASE_URI = 'postgres://mjkygbnmjuuias:Z8rz36fVR8hbffCJZ2XoeQ1Vv4@ec2-54-235-182-120.compute-1.amazonaws.com:5432/d5j7v7k1q22ap1'
 # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
