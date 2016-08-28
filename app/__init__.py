@@ -42,4 +42,4 @@ elif app.debug:
 # logging.debug('DEBUG ENABLED')
 
 
-from app import views  # , lesson, client
+from app import views
