@@ -10,7 +10,7 @@ import json
 
 #from shedule.models import Trainer
 
-#ogger = logging.getLogger('django')
+logger = logging.getLogger('django')
 
 class Trainer():
 

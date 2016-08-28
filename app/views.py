@@ -5,8 +5,6 @@ from app.client import api as client_api
 from app.trainer import Trainer
 from app.lesson import api as lesson_api
 
-from app import lesson
-
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
@@ -18,6 +16,7 @@ def index():
 @app.route('/api/trainer', methods=['POST','GET'])
 def trainer(request):
     #return trainer_api(request)
+    app.logger.debug('res = %s' % request)
     return Trainer.api(request)
 
 
