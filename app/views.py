@@ -17,10 +17,10 @@ def index():
 def trainer():
     app.logger.debug('_cached_json = %s' % request.is_xhr)
     app.logger.debug('_cached_json = %s' % request.get_json())
-    app.logger.debug('data = %s' % request.data())
+    app.logger.debug('data = %s' % request.data)
     app.logger.debug('args = %s' % request.args)
     # return trainer_api(request)
-    #return Trainer.api(request)
+    return trainer_api(request)
 
 
 @app.route('/api/client', methods=['POST'])

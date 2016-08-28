@@ -16,7 +16,7 @@ logger = logging.getLogger('django')
 
 def api(request):
 
-    requestBody = json.loads(request.args.decode('utf-8'))
+    requestBody = request.get_json()
     # requestBody = json.loads(request.body.decode('utf-8'))
     logger.debug('requestBody = %s' % requestBody)
     method = requestBody.get('method')
