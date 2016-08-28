@@ -16,6 +16,7 @@ def index():
 @app.route('/api/trainer', methods=['POST','GET'])
 def trainer():
     app.logger.debug('method = %s' % request.method)
+    app.logger.debug('args = %s' % request.args)
     return trainer_api(request)
     #return Trainer.api(request)
 
