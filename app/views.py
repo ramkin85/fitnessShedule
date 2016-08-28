@@ -16,6 +16,8 @@ def index():
 @app.route('/api/trainer', methods=['POST','GET'])
 def trainer():
     app.logger.debug('res = %s' % request)
+    for key in request:
+        app.logger.debug('key = %s; value = %s' % key,request[key])
     return trainer_api(request)
     #return Trainer.api(request)
 
