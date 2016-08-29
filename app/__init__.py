@@ -7,7 +7,6 @@ from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from config import basedir, ADMINS, MAIL_SERVER, MAIL_PASSWORD, MAIL_USERNAME, MAIL_PORT
 import logging
-from app import views
 
 app = Flask(__name__)
 
@@ -40,3 +39,5 @@ elif app.debug:
     app.logger.addHandler(file_handler)
     app.logger.info('fitnesShedule startup')
     app.logger.debug('fitnesShedule DEBUG mode')
+
+#from app import views
