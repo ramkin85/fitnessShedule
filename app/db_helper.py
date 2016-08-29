@@ -25,6 +25,8 @@ def upgrade_db(app):
     print('SQLALCHEMY_DATABASE_URI = %s' % SQLALCHEMY_DATABASE_URI)
     print('SQLALCHEMY_MIGRATE_REPO = %s' % SQLALCHEMY_MIGRATE_REPO)
     v = api.db_version(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO)
+    if v is None:
+        v = 0
     print('v = %s' % v)
-    api.upgrade(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO, v)
+    api.upgrade(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO, v+1)
     print('Current database version: ' + str(api.db_version(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO)))
