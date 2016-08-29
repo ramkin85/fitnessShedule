@@ -1,5 +1,4 @@
 import os
-
 from flask import Flask, json
 from flask_login import LoginManager
 # from flask.ext.login import LoginManager
@@ -40,4 +39,4 @@ elif app.debug:
     app.logger.info('fitnesShedule startup')
     app.logger.debug('fitnesShedule DEBUG mode')
 
-#from app import views
+from app import views
