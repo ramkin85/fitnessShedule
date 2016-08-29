@@ -39,7 +39,7 @@ class Trainer(db.Model):
     id = Column(db.Integer, primary_key=True)
     Name = Column(db.String(200), unique=True)
     Info = Column(db.String(2000))
-    Foto = Column(db.BLOB())
+    Foto = Column(db.String())
 
     def __init__(self, name, info, foto=None):
         self.Name = name

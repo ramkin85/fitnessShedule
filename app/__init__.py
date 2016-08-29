@@ -7,15 +7,12 @@ from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from config import basedir, ADMINS, MAIL_SERVER, MAIL_PASSWORD, MAIL_USERNAME, MAIL_PORT
 import logging
-from app import db_helper
+from app import views
 
 app = Flask(__name__)
 
 app.config.from_object('config')
 db = SQLAlchemy(app)
-
-# db_helper.create_db(app, db)
-db_helper.upgrade_db(app)
 
 # lm = LoginManager()
 # lm.init_app(app)
@@ -43,12 +40,3 @@ elif app.debug:
     app.logger.addHandler(file_handler)
     app.logger.info('fitnesShedule startup')
     app.logger.debug('fitnesShedule DEBUG mode')
-
-# logging.basicConfig(filename=os.path.join(basedir, 'tmp/fitnesShedule.log'), level=logging.DEBUG, format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
-# logging.debug('DEBUG ENABLED')
-
-from migrate.versioning import api
-from config import SQLALCHEMY_DATABASE_URI
-from config import SQLALCHEMY_MIGRATE_REPO
-
-from app import views
