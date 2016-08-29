@@ -5,9 +5,10 @@ import os.path
 
 
 def create_db(app, db):
-    v = api.db_version(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO)
+    # v = api.db_version(SQLALCHEMY_DATABASE_URI, SQLALCHEMY_MIGRATE_REPO)
+    v = None
     app.logger.info('v = %s' % v)
-    app.logger.info('v is None = %s' % v is None)
+    # app.logger.info('v is None = %s' % v is None)
     if v is None:
         db.create_all()
         if not os.path.exists(SQLALCHEMY_MIGRATE_REPO):

@@ -14,7 +14,7 @@ app = Flask(__name__)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 
-# db_helper.create_db(app, db)
+db_helper.create_db(app, db)
 # db_helper.upgrade_db(app)
 
 # lm = LoginManager()
