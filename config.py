@@ -7,7 +7,9 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SQLALCHEMY_DATABASE_URI = 'jdbc:postgresql://ec2-54-235-87-70.compute-1.amazonaws.com:5432/dbqf5pv9nomngb?sslmode=require&user=ebuhqiuztdjgdi&password=KeaaSiMlbh3_Mpb36u7igmcZz_'
+#dialect+driver://username:password@host:port/database
+SQLALCHEMY_DATABASE_URI = 'postgresql://ebuhqiuztdjgdi:KeaaSiMlbh3_Mpb36u7igmcZz_@ec2-54-235-87-70.compute-1.amazonaws.com:5432/dbqf5pv9nomngb?sslmode=require'
+#SQLALCHEMY_DATABASE_URI = 'postgresql://ec2-54-235-87-70.compute-1.amazonaws.com:5432/dbqf5pv9nomngb?sslmode=require&user=ebuhqiuztdjgdi&password=KeaaSiMlbh3_Mpb36u7igmcZz_'
 # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
