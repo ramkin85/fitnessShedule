@@ -67,7 +67,7 @@ def create(name, foto, info):
     if (name == None):
         return FieldError('Param "name" mast be defined for method "create"')
 
-    trainer = Trainer(Name=name, Foto=foto, Info=info)
+    trainer = Trainer(name=name, info=info, foto=foto)
     trainer.save()
 
     return None
