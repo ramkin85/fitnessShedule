@@ -1,92 +1,86 @@
 __author__ = 'ramkin85'
-
-import logging
-import json
-from datetime import datetime, time
-
+from app import app
+from flask import json
+from datetime import time
 from app.models import Lesson, Trainer, LessonClient, Client
 from app.client import ClientApi
-
-logger = logging.getLogger('django')
+from app.utils import resp_message, list_from_query
 
 
 def api(request):
-
-    requestBody = json.loads(request.body.decode('utf-8'))
-    method = requestBody.get('method')
-    logger.debug('testlogging method = %s' % method)
-    if (method == None):
-        response = FieldError('Method must be declared')
-        return HttpResponse(response)
-
-    if method == 'get_list':
-        startDate = requestBody.get('startDate')
-        endDate = requestBody.get('endDate')
-        response = get_list(startDate, endDate)
+    request_body = json.loads(request.body.decode('utf-8'))
+    method = request_body.get('method')
+    app.logger.debug('testlogging method = %s' % method)
+    if method is None:
+        return resp_message('ERROR', 'Method must be declared')
+    elif method == 'get_list':
+        start_date = request_body.get('startDate')
+        end_date = request_body.get('endDate')
+        response = get_list(start_date, end_date)
     elif method == 'create':
-        dayOfWeek = requestBody.get('DayOfWeek')
-        type = requestBody.get('Type')
-        startTime = requestBody.get('StartTime')
-        endTime = requestBody.get('EndTime')
-        trainer = requestBody.get('Trainer')
-        placesCount = requestBody.get('PlacesCount')
-        startDate = requestBody.get('StartDate')
-        endDate = requestBody.get('EndDate')
-        active = requestBody.get('Active')
-        response = create(dayOfWeek, type, startTime, endTime, trainer, placesCount, startDate, endDate, active)
+        day_of_week = request_body.get('DayOfWeek')
+        type = request_body.get('Type')
+        start_time = request_body.get('StartTime')
+        end_time = request_body.get('EndTime')
+        trainer = request_body.get('Trainer')
+        places_count = request_body.get('PlacesCount')
+        start_date = request_body.get('StartDate')
+        end_date = request_body.get('EndDate')
+        active = request_body.get('Active')
+        response = create(day_of_week, type, start_time, end_time, trainer, places_count, start_date, end_date, active)
     elif method == 'update':
-        id = requestBody.get('ID')
-        name = requestBody.get('Name')
-        phone = requestBody.get('Phone')
+        id = request_body.get('ID')
+        name = request_body.get('Name')
+        phone = request_body.get('Phone')
         response = update(id, name, phone)
     elif method == 'delete':
-        id = requestBody.get('ID')
+        id = request_body.get('ID')
         response = delete(id)
     elif method == 'bindClient':
-        id = requestBody.get('LessonID')
-        clientId = requestBody.get('ClientID')
-        response = bindClient(id, clientId)
+        id = request_body.get('LessonID')
+        client_id = request_body.get('ClientID')
+        response = bindClient(id, client_id)
     elif method == 'unbindClient':
-        id = requestBody.get('LessonID')
-        clientId = requestBody.get('ClientID')
-        response = unbindClient(id, clientId)
+        id = request_body.get('LessonID')
+        client_id = request_body.get('ClientID')
+        response = unbindClient(id, client_id)
     elif method == 'vote':
-        dayOfWeek = requestBody.get('DayOfWeek')
-        type = requestBody.get('Type')
-        startTime = requestBody.get('StartTime')
-        endTime = requestBody.get('EndTime')
-        trainer = requestBody.get('Trainer')
-        placesCount = requestBody.get('PlacesCount')
-        startDate = requestBody.get('StartDate')
-        endDate = requestBody.get('EndDate')
-        active = requestBody.get('Active')
-        clientName = requestBody.get('ClientName')
-        clientPhone = requestBody.get('ClientPhone')
-        clientComment = requestBody.get('ClientComment')
-        response = vote(dayOfWeek, type, startTime, endTime, trainer, placesCount,
-                          startDate, endDate, active, clientName, clientPhone, clientComment)
+        day_of_week = request_body.get('DayOfWeek')
+        type = request_body.get('Type')
+        start_time = request_body.get('StartTime')
+        end_time = request_body.get('EndTime')
+        trainer = request_body.get('Trainer')
+        places_count = request_body.get('PlacesCount')
+        start_date = request_body.get('StartDate')
+        end_date = request_body.get('EndDate')
+        active = request_body.get('Active')
+        client_name = request_body.get('ClientName')
+        client_phone = request_body.get('ClientPhone')
+        client_comment = request_body.get('ClientComment')
+        response = vote(day_of_week, type, start_time, end_time, trainer, places_count,
+                        start_date, end_date, active, client_name, client_phone, client_comment)
     else:
-        response = FieldError('unsapported method name "%s"' % method)
-
-    logger.debug('response = %s' % response)
-
-    return HttpResponse(response)
+        response = resp_message('ERROR', 'unsupported method name "%s"' % method)
+    app.logger.debug('response = %s' % response)
+    return response
 
 
-def get_list(startDate, endDate):
-    result = Lesson.objects.all().select_related('Trainer').filter(StartDate__lte=endDate,
-                             EndDate__gte=startDate, Active=True).select_related('Trainer').values('id', 'StartDate', 'EndDate', 'DayOfWeek',
-                                                           'Type', 'StartTime', 'EndTime', 'Trainer',
-                                                           'PlacesCount', 'Active', 'Trainer__Name')
-
-    logger.debug('result = %s' % result)
-    result = json.dumps({'LessonList': list(result)}, cls=DjangoJSONEncoder)
+def get_list(start_date, end_date):
+    result = Lesson.query.filter_by(StartDate__lte=end_date, EndDate__gte=start_date, Active=True).all()\
+        .select_related('Trainer').values('id', 'StartDate', 'EndDate', 'DayOfWeek', 'Type', 'StartTime', 'EndTime',
+                                          'Trainer', 'PlacesCount', 'Active', 'Trainer__Name')
+    # result = Lesson.query.all().select_related('Trainer')\
+    #     .filter(StartDate__lte=end_date, EndDate__gte=start_date, Active=True)\
+    #     .select_related('Trainer').values('id', 'StartDate', 'EndDate', 'DayOfWeek', 'Type', 'StartTime', 'EndTime',
+    #                                       'Trainer', 'PlacesCount', 'Active', 'Trainer__Name')
+    app.logger.debug('result = %s' % result)
+    result = json.dumps({'LessonList': list_from_query(result)})
     return result
 
 
 def get_by_id(id):
     lesson = Lesson.objects.get(pk=id)
-    logger.debug('lesson = %s' % lesson)
+    app.logger.debug('lesson = %s' % lesson)
     return lesson
 
 
@@ -95,9 +89,8 @@ def get_by_param(**kwargs):
     lesson = Lesson.objects.filter(id=kwargs.get('id'), StartDate__lte=kwargs.get('startDate'),
                                 StartTime=startTime, DayOfWeek=kwargs.get('dayOfWeek'),
                                 State=kwargs.get('state', 'ACTIVE'))
-    logger.debug('lesson = %s' % lesson)
+    app.logger.debug('lesson = %s' % lesson)
     return lesson
-
 
 def create(dayOfWeek, type, startTime, endTime, trainer, placesCount, startDate, endDate, active, state):
     if dayOfWeek is None or startTime is None or endTime is None or startDate is None:

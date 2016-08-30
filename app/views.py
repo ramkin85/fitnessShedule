@@ -13,7 +13,7 @@ def index():
 	return render_template('index.html', title='Расписание')
 
 
-@app.route('/api/trainer', methods=['POST', 'GET'])
+@app.route('/api/trainer', methods=['POST'])
 def trainer():
     app.logger.debug('_cached_json = %s' % request.is_xhr)
     app.logger.debug('_cached_json = %s' % request.get_json())
