@@ -1,5 +1,5 @@
 __author__ = 'ramkin85'
-from app import app
+from app import app,db
 from flask import json
 from datetime import time
 from app.models import Lesson, Trainer, LessonClient, Client
@@ -39,11 +39,11 @@ def api(request):
     elif method == 'bindClient':
         id = request_body.get('LessonID')
         client_id = request_body.get('ClientID')
-        response = bindClient(id, client_id)
+        response = bind_client(id, client_id)
     elif method == 'unbindClient':
         id = request_body.get('LessonID')
         client_id = request_body.get('ClientID')
-        response = unbindClient(id, client_id)
+        response = unbind_client(id, client_id)
     elif method == 'vote':
         day_of_week = request_body.get('DayOfWeek')
         type = request_body.get('Type')
@@ -67,8 +67,7 @@ def api(request):
 
 def get_list(start_date, end_date):
     result = Lesson.query.filter_by(StartDate__lte=end_date, EndDate__gte=start_date, Active=True).all()\
-        .select_related('Trainer').values('id', 'StartDate', 'EndDate', 'DayOfWeek', 'Type', 'StartTime', 'EndTime',
-                                          'Trainer', 'PlacesCount', 'Active', 'Trainer__Name')
+        .select_related('Trainer')
     # result = Lesson.query.all().select_related('Trainer')\
     #     .filter(StartDate__lte=end_date, EndDate__gte=start_date, Active=True)\
     #     .select_related('Trainer').values('id', 'StartDate', 'EndDate', 'DayOfWeek', 'Type', 'StartTime', 'EndTime',
@@ -79,95 +78,85 @@ def get_list(start_date, end_date):
 
 
 def get_by_id(id):
-    lesson = Lesson.objects.get(pk=id)
+    lesson = Lesson.qyery.get(id)
     app.logger.debug('lesson = %s' % lesson)
     return lesson
 
 
 def get_by_param(**kwargs):
-    startTime = time(kwargs.get('startTime')['hours'], kwargs.get('startTime')['minutes'])
-    lesson = Lesson.objects.filter(id=kwargs.get('id'), StartDate__lte=kwargs.get('startDate'),
-                                StartTime=startTime, DayOfWeek=kwargs.get('dayOfWeek'),
+    start_time = time(kwargs.get('startTime')['hours'], kwargs.get('startTime')['minutes'])
+    lesson = Lesson.qyery.filter(id=kwargs.get('id'), StartDate__lte=kwargs.get('startDate'),
+                                StartTime=start_time, DayOfWeek=kwargs.get('dayOfWeek'),
                                 State=kwargs.get('state', 'ACTIVE'))
     app.logger.debug('lesson = %s' % lesson)
     return lesson
 
-def create(dayOfWeek, type, startTime, endTime, trainer, placesCount, startDate, endDate, active, state):
-    if dayOfWeek is None or startTime is None or endTime is None or startDate is None:
-        return FieldError('Missed required params')
 
-    try:
-        trainer = Trainer.objects.get(pk=trainer)
-    except:
-        trainer = None
+def create(day_of_week, type, start_time, end_time, trainer_id, places_count, start_date, end_date, active, state):
+    if day_of_week is None or start_time is None or end_time is None or start_date is None:
+        resp_message('ERROR', 'Missed required params')
 
-    startTime = time(startTime['hours'], startTime['minutes'])
-    endTime = time(endTime['hours'], endTime['minutes'])
+    start_time = time(start_time['hours'], start_time['minutes'])
+    end_time = time(end_time['hours'], end_time['minutes'])
     if state is None:
         state = 'ACTIVE'
-    lesson = Lesson(DayOfWeek=dayOfWeek, Type=type, StartTime=startTime,
-             EndTime=endTime, Trainer=trainer, PlacesCount=placesCount, StartDate=startDate, EndDate=endDate,
-                    Active=active, State=state)
-    lesson.save()
-
+    lesson = Lesson(day_of_week=day_of_week, type=type, start_time=start_time,
+                    end_time=end_time, trainer_id=trainer_id, places_count=places_count, start_date=start_date, end_date=end_date,
+                    active=active, state=state)
+    db.session.add(lesson)
+    db.session.commit()
     return 'Lesson created successfully.'
 
 
 def delete(id):
-    #return 'mocked'
-    if id == None:
-        return FieldError('Param "id" mast be defined for method "delete"')
-
-    lesson = Lesson.objects.get(pk=id)
-    lesson.delete()
-
+    if id is None:
+        return resp_message('ERROR', 'Param "id" mast be defined for method "delete"')
+    lesson = Lesson.qyery.get(id)
+    db.session.delete(lesson)
+    db.session.commit()
     return 'Lesson deleted successfully.'
 
 
-def update(id, dayOfWeek, type, startTime, endTime, trainer, placesCount):
-    lesson = Lesson.objects.get(pk=id)
-    lesson.DayOfWeek = dayOfWeek
+def update(id, day_of_week, type, start_time, end_time, trainer, places_count):
+    lesson = Lesson.qyery.get(id)
+    lesson.DayOfWeek = day_of_week
     lesson.Type = type
-    lesson.StartTime = startTime
-    lesson.EndTime = endTime
+    lesson.StartTime = start_time
+    lesson.EndTime = end_time
     lesson.Trainer = trainer
-    lesson.PlacesCount = placesCount
-
-    lesson.update()
-
+    lesson.PlacesCount = places_count
+    db.session.update(lesson)
+    db.session.commit()
     return 'Lesson updated successfully.'
 
 
-def bindClient(id, clientId):
-    lesson = Lesson.objects.get(id=id)
-    client = Client.objects.get(id=clientId)
-    lessonClient = LessonClient(Lesson=lesson, Client=client)
-    lessonClient.save()
-
+def bind_client(id, client_id):
+    lesson = Lesson.qyery.get(id=id)
+    client = Client.qyery.get(id=client_id)
+    lesson_client = LessonClient(lesson=lesson, client=client)
+    db.session.add(lesson_client)
+    db.session.commit()
     return 'Client binded to lesson successfully.'
 
-def unbindClient(id, clientId):
-    lesson = Lesson.objects.get(id=id)
-    client = Client.objects.get(id=clientId)
-    lessonClient = LessonClient(Lesson=lesson, Client=client)
-    lessonClient.delete()
 
+def unbind_client(id, clientId):
+    lesson = Lesson.qyery.get(id=id)
+    client = Client.qyery.get(id=clientId)
+    lesson_client = LessonClient(lesson=lesson, client=client)
+    db.session.delete(lesson_client)
+    db.session.commit()
     return 'Client unbinded from lesson successfully.'
 
 
-def vote(dayOfWeek, type, startTime, endTime, trainer, placesCount,
-                          startDate, endDate, active, clientName, clientPhone, clientComment):
-    if dayOfWeek is None or startTime is None or endTime is None or startDate is None\
-            or clientName is None or clientPhone is None:
-        return FieldError('Missed required params')
-
-    lesson = get_by_param(startDate=startDate, startTime=startTime, dayOfWeek=dayOfWeek, state='VOTING')
+def vote(day_of_week, type, start_time, end_time, trainer, places_count, start_date, end_date, active, client_name,
+         client_phone, client_comment):
+    if day_of_week is None or start_time is None or end_time is None or start_date is None\
+            or client_name is None or client_phone is None:
+        return resp_message('ERROR', 'Missed required params')
+    lesson = get_by_param(startDate=start_date, startTime=start_time, dayOfWeek=day_of_week, state='VOTING')
     if lesson.__len__() == 0:
-        lesson = create(dayOfWeek, 'group', startTime, endTime, trainer, placesCount,
-                          startDate, endDate, False, 'VOTING')
-
-    client = ClientApi.create(clientName, clientPhone, clientComment, 'POTENCIAL')
-
-    bindClient(lesson.id, client.id)
-
+        lesson = create(day_of_week, 'group', start_time, end_time, trainer, places_count,
+                        start_date, end_date, False, 'VOTING')
+    client = ClientApi.create(client_name, client_phone, client_comment, 'POTENCIAL')
+    bind_client(lesson.id, client.id)
     return 'Lesson created successfully.'

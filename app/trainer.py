@@ -54,10 +54,10 @@ class TrainerApi(Trainer):
         if name is None:
             return resp_message('ERROR', 'Param "name" mast be defined for method "create"')
 
-        trainer = Trainer(Name=name, Info=info, Foto=foto)
+        trainer = Trainer(name=name, info=info, foto=foto)
         db.session.add(trainer)
         db.session.commit()
-        return None
+        return resp_message('SUCCESS', 'Trainer %s successfully added' % name)
 
     def delete(id):
         if id is None:

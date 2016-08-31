@@ -68,24 +68,25 @@ class Lesson(db.Model):
     Type = Column(db.String(20))
     StartTime = Column(db.Time())
     EndTime = Column(db.Time())
-    Trainer = Column(db.Integer, db.ForeignKey('trainer.id'))
+    TrainerId = Column(db.Integer, db.ForeignKey('trainer.id'))
     PlacesCount = Column(db.Integer)
     StartDate = Column(db.Integer)
     EndDate = Column(db.Integer)
     Active = Column(db.Boolean())
     State = Column(db.String(20))
+    Trainer = db.relationship('Trainer', backref=db.backref('Lessons', lazy='dynamic'))
 
-    def __init__(self, DayOfWeek, Type, StartTime, EndTime, Trainer, PlacesCount, StartDate, EndDate, Active, State):
-        self.DayOfWeek = DayOfWeek
-        self.Type = Type
-        self.StartTime = StartTime
-        self.EndTime = EndTime
-        self.Trainer = Trainer
-        self.PlacesCount = PlacesCount
-        self.StartDate = StartDate
-        self.EndDate = EndDate
-        self.Active = Active
-        self.State = State
+    def __init__(self, day_of_week, type, start_time, end_time, trainer_id, places_count, start_date, end_date, active, state):
+        self.DayOfWeek = day_of_week
+        self.Type = type
+        self.StartTime = start_time
+        self.EndTime = end_time
+        self.TrainerId = trainer_id
+        self.PlacesCount = places_count
+        self.StartDate = start_date
+        self.EndDate = end_date
+        self.Active = active
+        self.State = state
 
     def __repr__(self):
         return '{Lesson DayOfWeek: %r}' % self.Name
