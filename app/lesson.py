@@ -5,6 +5,7 @@ from datetime import time
 from app.models import Lesson, Trainer, LessonClient, Client
 from app.client import ClientApi
 from app.utils import resp_message, list_from_query
+from app.emails import admin_notification
 
 
 def api(request):
@@ -57,8 +58,9 @@ def api(request):
         client_name = request_body.get('ClientName')
         client_phone = request_body.get('ClientPhone')
         client_comment = request_body.get('ClientComment')
+        mode = request_body.get('mode')
         response = vote(day_of_week, type, start_time, end_time, trainer, places_count,
-                        start_date, end_date, active, client_name, client_phone, client_comment)
+                        start_date, end_date, active, client_name, client_phone, client_comment, mode)
     else:
         response = resp_message('ERROR', 'unsupported method name "%s"' % method)
     app.logger.debug('response = %s' % response)
@@ -67,14 +69,9 @@ def api(request):
 
 def get_list(start_date, end_date):
     result = Lesson.query.filter(Lesson.StartDate<=end_date, Lesson.EndDate>=start_date, Lesson.Active==True).all()
-    # result = Lesson.query.all().select_related('Trainer')\
-    #     .filter(StartDate__lte=end_date, EndDate__gte=start_date, Active=True)\
-    #     .select_related('Trainer').values('id', 'StartDate', 'EndDate', 'DayOfWeek', 'Type', 'StartTime', 'EndTime',
-    #                                       'Trainer', 'PlacesCount', 'Active', 'Trainer__Name')
     app.logger.debug('result = %s' % result)
-    result = {'LessonList': list_from_query(result,['id', 'StartDate', 'EndDate', 'DayOfWeek', 'Type',
-                                                               'StartTime', 'EndTime', 'PlacesCount',
-                                                               'Active', 'Trainer.Name'])}
+    result = {'LessonList': list_from_query(result,['id', 'StartDate', 'EndDate', 'DayOfWeek', 'Type', 'StartTime',
+                                                    'EndTime', 'PlacesCount', 'Active', 'Trainer.Name'])}
     result = json.dumps(result, default=customserializer.to_json)
     return result
 
@@ -95,17 +92,20 @@ def get_by_param(**kwargs):
 
 
 def create(day_of_week, type, start_time, end_time, trainer_id, places_count, start_date, end_date, active, state='ACTIVE'):
-    if day_of_week is None or start_time is None or end_time is None or start_date is None:
-        resp_message('ERROR', 'Missed required params')
+    try:
+        if day_of_week is None or start_time is None or end_time is None or start_date is None:
+            resp_message('ERROR', 'Missed required params')
 
-    start_time = time(start_time['hours'], start_time['minutes'])
-    end_time = time(end_time['hours'], end_time['minutes'])
-    lesson = Lesson(day_of_week=day_of_week, type=type, start_time=start_time,
-                    end_time=end_time, trainer_id=trainer_id, places_count=places_count, start_date=start_date, end_date=end_date,
-                    active=active, state=state)
-    db.session.add(lesson)
-    db.session.commit()
-    return {'message': 'Lesson created successfully.', 'lesson': lesson}
+        start_time = time(start_time['hours'], start_time['minutes'])
+        end_time = time(end_time['hours'], end_time['minutes'])
+        lesson = Lesson(day_of_week=day_of_week, type=type, start_time=start_time,
+                        end_time=end_time, trainer_id=trainer_id, places_count=places_count, start_date=start_date, end_date=end_date,
+                        active=active, state=state)
+        db.session.add(lesson)
+        db.session.commit()
+        return {'status': 'OK', 'message': 'Lesson created successfully.', 'lesson': lesson}
+    except Exception:
+        return {'status': 'ERROR', 'message': 'En error ocured while lesson create.', 'error': Exception}
 
 
 def delete(id):
@@ -145,17 +145,20 @@ def unbind_client(id, client_id):
 
 
 def vote(day_of_week, type, start_time, end_time, trainer, places_count, start_date, end_date, active, client_name,
-         client_phone, client_comment):
-    if day_of_week is None or start_time is None or end_time is None or start_date is None\
-            or client_name is None or client_phone is None:
-        return resp_message('ERROR', 'Missed required params')
-    lesson_list = get_by_param(startDate=start_date, startTime=start_time, dayOfWeek=day_of_week, state='VOTING')
-    if lesson_list.__len__() == 0:
-        lesson = create(day_of_week, 'group', start_time, end_time, trainer, places_count,
-                        start_date, end_date, False, 'VOTING').get('lesson')
+         client_phone, client_comment, mode='FULL'):
+    if mode == 'SIMPLE':
+        admin_notification()
     else:
-        lesson = lesson_list[0]
-    client = ClientApi.create(client_name, client_phone, client_comment, 'POTENCIAL').get('client')
-    if lesson is not None and client is not None:
-        bind_client(lesson.id, client.id)
-        return 'Lesson created successfully.'
+        if day_of_week is None or start_time is None or end_time is None or start_date is None\
+                or client_name is None or client_phone is None:
+            return resp_message('ERROR', 'Missed required params')
+        lesson_list = get_by_param(startDate=start_date, startTime=start_time, dayOfWeek=day_of_week, state='VOTING')
+        if lesson_list.__len__() == 0:
+            lesson = create(day_of_week, type, start_time, end_time, trainer, places_count,
+                            start_date, end_date, False, 'VOTING').get('lesson')
+        else:
+            lesson = lesson_list[0]
+        client = ClientApi.create(client_name, client_phone, client_comment, 'POTENCIAL').get('client')
+        if lesson is not None and client is not None:
+            bind_client(lesson.id, client.id)
+            return 'Lesson created successfully.'

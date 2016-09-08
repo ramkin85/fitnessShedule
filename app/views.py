@@ -9,7 +9,6 @@ from app.lesson import api as lesson_api
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index():
-    # return 'hello world'
     return render_template('index.html', title='Расписание')
 
 
@@ -19,7 +18,6 @@ def trainer():
     app.logger.debug('_cached_json = %s' % request.get_json())
     app.logger.debug('data = %s' % request.data)
     app.logger.debug('args = %s' % request.args)
-    # return trainer_api(request)
     return trainer_api(request)
 
 

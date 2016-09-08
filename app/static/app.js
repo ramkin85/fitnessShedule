@@ -19,6 +19,13 @@ TS.config(
     }
 );
 
+TS.config(['$routeProvider', function ($routeProvider) {
+    $routeProvider.when('/', {
+        templateUrl: 'static/shedule/shedule.html',
+        controller: 'SheduleCtrl'
+    });
+}]);
+
 /*
 TS.config(['$routeProvider', function ($httpProvider, $routeProvider) {
  //$routeProvider.otherwise({redirectTo: '/shedule'});

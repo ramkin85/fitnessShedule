@@ -1,0 +1,9 @@
+<!-- extend from base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row jumbotron">
+        <h1>File Not Found</h1>
+        <p><a class="btn btn-primary btn-lg" role="button" href="{{ url_for('index') }}">Back</a></p>
+    </div>
+{% endblock %}
