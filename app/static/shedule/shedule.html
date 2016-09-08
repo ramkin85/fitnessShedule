@@ -14,33 +14,33 @@
         <div class="panel-body">
             <div class="row" ng-repeat="day in DAY_LIST">
                 <div class="col-xs-1 ts-day">{{day.name}}</div>
-                <div class="col-xs-1 btn-info lesson-info" ng-class="(weekShedule[day.id+'_'+time])?'':'lesson-free'"
+                <div class="col-xs-1 btn-info lesson-info" ng-class="(weekShedule[day.id+'_'+time.value])?'':'lesson-free'"
                      ng-repeat="time in TIME_LIST">
-                    <div ng-if="weekShedule[day.id+'_'+time]" ng-click="bindClientToClass(weekShedule[day.id+'_'+time])" >
+                    <div ng-if="weekShedule[day.id+'_'+time.value]" ng-click="bindClientToClass(weekShedule[day.id+'_'+time.value])" >
                         <div data-toggle="modal"
                              data-target="#bindPanel">
-                        <span>{{weekShedule[day.id+'_'+time].StartTime.substring(0,5)}}</span>
-                        <span>{{weekShedule[day.id+'_'+time].EndTime.substring(0,5)}}</span>
-                        <span>{{weekShedule[day.id+'_'+time].Trainer__Name}}</span>
-                        <span ng-if="weekShedule[day.id+'_'+time].Type=='group'">
-                            {{weekShedule[day.id+'_'+time].FreePlaces || weekShedule[day.id+'_'+time].PlacesCount + '/' + weekShedule[day.id+'_'+time].PlacesCount}}
+                        <span>{{weekShedule[day.id+'_'+time.value].StartTime.substring(0,5)}}</span>
+                        <span>{{weekShedule[day.id+'_'+time.value].EndTime.substring(0,5)}}</span>
+                        <span>{{weekShedule[day.id+'_'+time.value].Trainer__Name}}</span>
+                        <span ng-if="weekShedule[day.id+'_'+time.value].Type=='group'">
+                            {{weekShedule[day.id+'_'+time.value].FreePlaces || weekShedule[day.id+'_'+time.value].PlacesCount + '/' + weekShedule[day.id+'_'+time.value].PlacesCount}}
                         </span>
-                        <span>{{weekShedule[day.id+'_'+time].Type === 'group'?'Групповое':'Индивидуальное'}}</span>
+                        <span>{{weekShedule[day.id+'_'+time.value].Type === 'group'?'Групповое':'Индивидуальное'}}</span>
                         </div>
                         <div class="ts-lesson-menu">
                             <span class="glyphicon glyphicon-list"
-                                  ng-click="getLessonClientList(weekShedule[day.id+'_'+time])"
+                                  ng-click="getLessonClientList(weekShedule[day.id+'_'+time.value])"
                                   data-toggle="modal"
                                   data-target="#clientListPanel"
                             ></span>
                         </div>
                     </div>
-                    <div ng-if="!weekShedule[day.id+'_'+time]"
+                    <div ng-if="!weekShedule[day.id+'_'+time.value]"
                          data-toggle="modal"
                          data-target="#votePanel"
-                         ng-click="vote(day.id, time)"
+                         ng-click="vote(day.id, time.value)"
                     >
-                        <span>{{time.substring(0,5)}}</span>
+                        <span>{{time.text.substring(0,5)}}</span>
                         <span>Голосую за время!</span>
                     </div>
                 </div>

@@ -66,8 +66,8 @@ class Lesson(db.Model):
     id = Column(db.Integer, primary_key=True)
     DayOfWeek = Column(db.String(20))
     Type = Column(db.String(20))
-    StartTime = Column(db.Time())
-    EndTime = Column(db.Time())
+    StartTime = Column(db.Integer)
+    EndTime = Column(db.Integer)
     TrainerId = Column(db.Integer, db.ForeignKey('trainer.id'))
     PlacesCount = Column(db.Integer)
     StartDate = Column(db.Integer)
@@ -89,7 +89,7 @@ class Lesson(db.Model):
         self.State = state
 
     def __repr__(self):
-        return '{Lesson DayOfWeek: %r}' % self.Name
+        return '{Lesson DayOfWeek: %r}' % self.DayOfWeek
 
     def __getitem__(self, key):
         if key == 'id':

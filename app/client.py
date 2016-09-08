@@ -59,7 +59,7 @@ class ClientApi(Client):
         db.session.add(client)
         db.session.commit()
 
-        return resp_message('SUCCESS', 'Client created successfully.')
+        return {'status': 'SUCCESS', 'message': 'Client created successfully.', 'client': client}
 
     def remove(id):
         if id is None:

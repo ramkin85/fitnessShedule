@@ -31,5 +31,5 @@ def client():
 
 
 @app.route('/api/lesson', methods=['POST'])
-def lesson(request):
+def lesson():
     return lesson_api(request)

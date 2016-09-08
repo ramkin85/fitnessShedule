@@ -1,5 +1,5 @@
 __author__ = 'ramkin85'
-from app import app,db
+from app import app,db,customserializer
 from flask import json
 from datetime import time
 from app.models import Lesson, Trainer, LessonClient, Client
@@ -8,7 +8,7 @@ from app.utils import resp_message, list_from_query
 
 
 def api(request):
-    request_body = json.loads(request.body.decode('utf-8'))
+    request_body = json.loads(request.data.decode('utf-8'))
     method = request_body.get('method')
     app.logger.debug('testlogging method = %s' % method)
     if method is None:
@@ -66,59 +66,59 @@ def api(request):
 
 
 def get_list(start_date, end_date):
-    result = Lesson.query.filter_by(StartDate__lte=end_date, EndDate__gte=start_date, Active=True).all()\
-        .select_related('Trainer')
+    result = Lesson.query.filter(Lesson.StartDate<=end_date, Lesson.EndDate>=start_date, Lesson.Active==True).all()
     # result = Lesson.query.all().select_related('Trainer')\
     #     .filter(StartDate__lte=end_date, EndDate__gte=start_date, Active=True)\
     #     .select_related('Trainer').values('id', 'StartDate', 'EndDate', 'DayOfWeek', 'Type', 'StartTime', 'EndTime',
     #                                       'Trainer', 'PlacesCount', 'Active', 'Trainer__Name')
     app.logger.debug('result = %s' % result)
-    result = json.dumps({'LessonList': list_from_query(result)})
+    result = {'LessonList': list_from_query(result,['id', 'StartDate', 'EndDate', 'DayOfWeek', 'Type',
+                                                               'StartTime', 'EndTime', 'PlacesCount',
+                                                               'Active', 'Trainer.Name'])}
+    result = json.dumps(result, default=customserializer.to_json)
     return result
 
 
 def get_by_id(id):
-    lesson = Lesson.qyery.get(id)
+    lesson = Lesson.query.get(id)
     app.logger.debug('lesson = %s' % lesson)
     return lesson
 
 
 def get_by_param(**kwargs):
     start_time = time(kwargs.get('startTime')['hours'], kwargs.get('startTime')['minutes'])
-    lesson = Lesson.qyery.filter(id=kwargs.get('id'), StartDate__lte=kwargs.get('startDate'),
-                                StartTime=start_time, DayOfWeek=kwargs.get('dayOfWeek'),
-                                State=kwargs.get('state', 'ACTIVE'))
+    lesson = Lesson.query.filter(Lesson.StartDate<=kwargs.get('startDate'),
+                                 Lesson.StartTime==start_time, Lesson.DayOfWeek==str(kwargs.get('dayOfWeek')),
+                                 Lesson.State==kwargs.get('state', 'ACTIVE')).all()
     app.logger.debug('lesson = %s' % lesson)
     return lesson
 
 
-def create(day_of_week, type, start_time, end_time, trainer_id, places_count, start_date, end_date, active, state):
+def create(day_of_week, type, start_time, end_time, trainer_id, places_count, start_date, end_date, active, state='ACTIVE'):
     if day_of_week is None or start_time is None or end_time is None or start_date is None:
         resp_message('ERROR', 'Missed required params')
 
     start_time = time(start_time['hours'], start_time['minutes'])
     end_time = time(end_time['hours'], end_time['minutes'])
-    if state is None:
-        state = 'ACTIVE'
     lesson = Lesson(day_of_week=day_of_week, type=type, start_time=start_time,
                     end_time=end_time, trainer_id=trainer_id, places_count=places_count, start_date=start_date, end_date=end_date,
                     active=active, state=state)
     db.session.add(lesson)
     db.session.commit()
-    return 'Lesson created successfully.'
+    return {'message': 'Lesson created successfully.', 'lesson': lesson}
 
 
 def delete(id):
     if id is None:
         return resp_message('ERROR', 'Param "id" mast be defined for method "delete"')
-    lesson = Lesson.qyery.get(id)
+    lesson = Lesson.query.get(id)
     db.session.delete(lesson)
     db.session.commit()
     return 'Lesson deleted successfully.'
 
 
 def update(id, day_of_week, type, start_time, end_time, trainer, places_count):
-    lesson = Lesson.qyery.get(id)
+    lesson = Lesson.query.get(id)
     lesson.DayOfWeek = day_of_week
     lesson.Type = type
     lesson.StartTime = start_time
@@ -131,18 +131,14 @@ def update(id, day_of_week, type, start_time, end_time, trainer, places_count):
 
 
 def bind_client(id, client_id):
-    lesson = Lesson.qyery.get(id=id)
-    client = Client.qyery.get(id=client_id)
-    lesson_client = LessonClient(lesson=lesson, client=client)
+    lesson_client = LessonClient(lesson=id, client=client_id)
     db.session.add(lesson_client)
     db.session.commit()
     return 'Client binded to lesson successfully.'
 
 
-def unbind_client(id, clientId):
-    lesson = Lesson.qyery.get(id=id)
-    client = Client.qyery.get(id=clientId)
-    lesson_client = LessonClient(lesson=lesson, client=client)
+def unbind_client(id, client_id):
+    lesson_client = LessonClient(lesson=id, client=client_id)
     db.session.delete(lesson_client)
     db.session.commit()
     return 'Client unbinded from lesson successfully.'
@@ -153,10 +149,13 @@ def vote(day_of_week, type, start_time, end_time, trainer, places_count, start_d
     if day_of_week is None or start_time is None or end_time is None or start_date is None\
             or client_name is None or client_phone is None:
         return resp_message('ERROR', 'Missed required params')
-    lesson = get_by_param(startDate=start_date, startTime=start_time, dayOfWeek=day_of_week, state='VOTING')
-    if lesson.__len__() == 0:
+    lesson_list = get_by_param(startDate=start_date, startTime=start_time, dayOfWeek=day_of_week, state='VOTING')
+    if lesson_list.__len__() == 0:
         lesson = create(day_of_week, 'group', start_time, end_time, trainer, places_count,
-                        start_date, end_date, False, 'VOTING')
-    client = ClientApi.create(client_name, client_phone, client_comment, 'POTENCIAL')
-    bind_client(lesson.id, client.id)
-    return 'Lesson created successfully.'
+                        start_date, end_date, False, 'VOTING').get('lesson')
+    else:
+        lesson = lesson_list[0]
+    client = ClientApi.create(client_name, client_phone, client_comment, 'POTENCIAL').get('client')
+    if lesson is not None and client is not None:
+        bind_client(lesson.id, client.id)
+        return 'Lesson created successfully.'
